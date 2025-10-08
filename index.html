@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#090a0f">
+    <meta name="description" content="A fun stacking game">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="StakeStack">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    
+    <title>StakeStack</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="shortcut icon" href="TemplateData/Logo.ico">
+    <link rel="apple-touch-icon" href="TemplateData/Logo.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+    <!-- Custom Background -->
+    <div id="stars"></div>
+    <div id="space-background"></div>
+
+    <!-- Custom Loading Screen -->
+    <div id="install-prompt" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; color: white; text-align: center; padding: 20px; box-sizing: border-box;">
+      <h2>StakeStack</h2>
+      <p style="margin-bottom: 30px; font-size: 18px;">Install this app to your home screen for the best experience!</p>
+      <button id="install-button" class="glass-button">Install App</button>
+      <button id="play-in-browser" class="glass-button" style="display: none;">Play in browser anyway</button>
+      <button id="play-anyway" class="glass-button" style="background: rgba(100, 150, 255, 0.2);">Play Anyway</button>
+      <div id="platform-instructions" class="glass-card" style="display: none; margin-top: 20px;">
+        <div id="android-instructions" style="display: none;">
+          <p style="margin: 10px 0;"><strong>Android Installation:</strong></p>
+          <p style="margin: 10px 0;">1. Look for the <strong>Install</strong> button in your browser's address bar</p>
+          <p style="margin: 10px 0;">2. Tap the <strong>Install</strong> button to add to home screen</p>
+          <p style="margin: 10px 0;">3. Confirm installation when prompted</p>
+        </div>
+        <div id="ios-instructions" style="display: none;">
+          <p style="margin: 10px 0;"><strong>iOS Installation:</strong></p>
+          <p style="margin: 10px 0;">1. Tap the <strong>Share</strong> button (square with arrow) at the bottom</p>
+          <p style="margin: 10px 0;">2. Select <strong>Add to Home Screen</strong></p>
+          <p style="margin: 10px 0;">3. Tap <strong>Add</strong> to confirm</p>
+        </div>
+      </div>
+      <p style="margin-top: 30px; font-size: 14px; color: #aaa;">Note: This game is optimized for installed app experience</p>
+    </div>
+    
+    <div id="loading-screen">
+      <p>Loading Game...</p>
+    </div>
+
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=500 height=900 tabindex="-1"></canvas>
+      <div id="unity-warning"></div>
+    </div>
+
+    <script>
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingScreen = document.querySelector("#loading-screen");
+      var warningBanner = document.querySelector("#unity-warning");
+      var installPrompt = document.querySelector("#install-prompt");
+
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      // Check if running as standalone PWA
+      function isStandalone() {
+        return window.matchMedia('(display-mode: standalone)').matches || 
+               window.navigator.standalone === true || 
+               document.referrer.includes('android-app://');
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/Build.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/Build.data",
+        frameworkUrl: buildUrl + "/Build.framework.js",
+        codeUrl: buildUrl + "/Build.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "StakeStack",
+        productVersion: "0.1",
+        showBanner: unityShowBanner,
+      };
+
+      var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      var isAndroid = /Android/i.test(navigator.userAgent);
+      var isDesktop = !isMobile; // If not mobile, then it's desktop
+
+      // Show install prompt on mobile if not running as PWA
+      if (isMobile && !isStandalone()) {
+        installPrompt.style.display = 'flex';
+        // Show platform-specific instructions
+        var platformInstructions = document.getElementById('platform-instructions');
+        if (isIOS) {
+          document.getElementById('ios-instructions').style.display = 'block';
+          document.getElementById('android-instructions').style.display = 'none';
+          // Disable the install button for iOS since it uses a different mechanism
+          document.getElementById('install-button').disabled = true;
+          document.getElementById('install-button').style.opacity = '0.5';
+          document.getElementById('install-button').textContent = 'Follow iOS Instructions';
+        } else if (isAndroid) {
+          document.getElementById('android-instructions').style.display = 'block';
+          document.getElementById('ios-instructions').style.display = 'none';
+          // For Android, keep the install button enabled
+          document.getElementById('install-button').disabled = false;
+          document.getElementById('install-button').style.opacity = '1';
+          document.getElementById('install-button').textContent = 'Install App';
+        }
+        platformInstructions.style.display = 'block';
+        
+        // On mobile, always show the "Play Anyway" button as an option
+        document.getElementById('play-anyway').style.display = 'block';
+      } else if (isStandalone()) {
+        // If running as PWA, hide the install prompt and show the game
+        installPrompt.style.display = 'none';
+        // Start the game when the page loads
+        window.addEventListener('load', startGame);
+      } else if (isDesktop) {
+        // On desktop, hide install prompt and allow game to load normally
+        installPrompt.style.display = 'none';
+        // Start the game directly on desktop
+        window.addEventListener('load', startGame);
+      }
+
+      // Handle install button click
+      document.getElementById('install-button').addEventListener('click', async () => {
+        if (isIOS) {
+          // On iOS, show an alert with instructions to add to home screen
+          alert("To install this app on iOS:\\n1. Tap the Share button (square with arrow) at the bottom\\n2. Select 'Add to Home Screen'\\n3. Tap 'Add' to confirm");
+        } else if (deferredPrompt) {
+          // For Android and other platforms, use the normal install flow
+          deferredPrompt.prompt();
+          
+          // Wait for the user to respond to the prompt
+          const { outcome } = await deferredPrompt.userChoice;
+          
+          // Clean up the deferred prompt variable
+          deferredPrompt = null;
+        }
+      });
+
+      // Handle play in browser button
+      document.getElementById('play-in-browser').addEventListener('click', () => {
+        if (isMobile) {
+          alert("We strongly recommend installing this app for the best experience. Please use the 'Create App' button to install to your home screen.");
+        }
+        installPrompt.style.display = 'none';
+        startGame();
+      });
+
+      // Handle play anyway button
+      document.getElementById('play-anyway').addEventListener('click', () => {
+        if (isMobile) {
+          alert("Enjoy playing! For the best experience, we recommend installing this app to your home screen.");
+        }
+        installPrompt.style.display = 'none';
+        startGame();
+      });
+
+      // If running as standalone, start the game immediately
+      if (isStandalone()) {
+        window.addEventListener('load', startGame);
+      }
+
+      // Register service worker for PWA
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            })
+            .catch(function(err) {
+              console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+      }
+
+      // PWA Install button functionality
+      let deferredPrompt;
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+        // Stash the event so it can be triggered later
+        deferredPrompt = e;
+      });
+
+      function startGame() {
+        if (isMobile) {
+          container.className = "unity-mobile";
+          canvas.className = "unity-mobile";
+          var meta = document.createElement('meta');
+          meta.name = 'viewport';
+          meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+          document.getElementsByTagName('head')[0].appendChild(meta);
+        } else {
+          canvas.style.width = "500px";
+          canvas.style.height = "900px";
+        }
+
+        var script = document.createElement("script");
+        script.src = loaderUrl;
+        script.onload = () => {
+          createUnityInstance(canvas, config, (progress) => {
+            // You can update a custom progress bar here if you want
+          }).then((unityInstance) => {
+            loadingScreen.style.display = "none";
+          }).catch((message) => {
+            alert(message);
+          });
+        };
+        document.body.appendChild(script);
+      }
+    </script>
+  </body>
+</html>
