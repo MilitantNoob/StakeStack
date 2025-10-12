@@ -43,10 +43,16 @@
           <p style="margin: 10px 0;">3. Tap <strong>Add</strong> to confirm</p>
         </div>
       </div>
-      <div id="browser-warning" class="glass-card" style="display: none; margin-top: 20px; background: rgba(255, 100, 100, 0.2); border: 1px solid rgba(255, 100, 100, 0.3);">
-        <p style="margin: 10px 0; color: #ff9999;"><strong>Browser Limitations Notice:</strong></p>
-        <p style="margin: 10px 0; font-size: 14px;">Safari on iOS has limitations that may affect popup functionality. For full features including social logins and external wallet connections, we recommend using Chrome or Firefox browsers.</p>
-        <p style="margin: 10px 0; font-size: 14px;">iOS users can also use the Chrome app from the App Store to access all features.</p>
+      <div id="android-browser-warning" class="glass-card" style="display: none; margin-top: 20px; background: rgba(100, 255, 100, 0.2); border: 1px solid rgba(100, 255, 100, 0.3);">
+        <p style="margin: 10px 0; color: #99ff99;"><strong>Great News for Android Users:</strong></p>
+        <p style="margin: 10px 0; font-size: 14px;">Popup features like social logins and external wallets work great in both Chrome browser and the PWA!</p>
+      </div>
+      <div id="ios-browser-warning" class="glass-card" style="display: none; margin-top: 20px; background: rgba(255, 100, 100, 0.2); border: 1px solid rgba(255, 100, 100, 0.3);">
+        <p style="margin: 10px 0; color: #ff9999;"><strong>iOS Browser Limitations:</strong></p>
+        <p style="margin: 10px 0; font-size: 14px;">For full features including social logins and external wallet connections:</p>
+        <p style="margin: 10px 0; font-size: 14px;">1. Use Chrome browser (install from App Store if needed)</p>
+        <p style="margin: 10px 0; font-size: 14px;">2. Or select "Open in Chrome" if you have it installed</p>
+        <p style="margin: 10px 0; font-size: 14px;">Note: Popup features don't work in the iOS PWA.</p>
       </div>
       <p style="margin-top: 30px; font-size: 14px; color: #aaa;">Note: This game is optimized for installed app experience</p>
     </div>
@@ -116,12 +122,13 @@
         installPrompt.style.display = 'flex';
         // Show platform-specific instructions
         var platformInstructions = document.getElementById('platform-instructions');
-        var browserWarning = document.getElementById('browser-warning');
+        var androidWarning = document.getElementById('android-browser-warning');
+        var iosWarning = document.getElementById('ios-browser-warning');
         if (isIOS) {
           document.getElementById('ios-instructions').style.display = 'block';
           document.getElementById('android-instructions').style.display = 'none';
           // Show browser warning for iOS Safari
-          browserWarning.style.display = 'block';
+          iosWarning.style.display = 'block';
           // Disable the install button for iOS since it uses a different mechanism
           document.getElementById('install-button').disabled = true;
           document.getElementById('install-button').style.opacity = '0.5';
@@ -129,6 +136,8 @@
         } else if (isAndroid) {
           document.getElementById('android-instructions').style.display = 'block';
           document.getElementById('ios-instructions').style.display = 'none';
+          // Show positive message for Android
+          androidWarning.style.display = 'block';
           // For Android, keep the install button enabled
           document.getElementById('install-button').disabled = false;
           document.getElementById('install-button').style.opacity = '1';
@@ -146,8 +155,8 @@
       } else if (isDesktop) {
         // On desktop, show browser warning if using Safari
         if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
-          var browserWarning = document.getElementById('browser-warning');
-          browserWarning.style.display = 'block';
+          var iosWarning = document.getElementById('ios-browser-warning');
+          iosWarning.style.display = 'block';
         }
         // Hide install prompt and allow game to load normally
         installPrompt.style.display = 'none';
@@ -159,7 +168,7 @@
       document.getElementById('install-button').addEventListener('click', async () => {
         if (isIOS) {
           // On iOS, show an alert with instructions to add to home screen
-          alert("To install this app on iOS:\\n1. Tap the Share button (square with arrow) at the bottom\\n2. Select 'Add to Home Screen'\\n3. Tap 'Add' to confirm\\n\\nNote: For full features including social logins and external wallets, we recommend using Chrome app on iOS.");
+          alert("To install this app on iOS:\\n1. Tap the Share button (square with arrow) at the bottom\\n2. Select 'Add to Home Screen'\\n3. Tap 'Add' to confirm\\n\\nImportant: Popup features (social logins, wallets) don't work in the PWA. Use Chrome browser for these features.");
         } else if (deferredPrompt) {
           // For Android and other platforms, use the normal install flow
           deferredPrompt.prompt();
@@ -185,7 +194,9 @@
       document.getElementById('play-anyway').addEventListener('click', () => {
         if (isMobile) {
           if (isIOS) {
-            alert("For the best experience with full features (social logins, external wallets), we recommend using Chrome or Firefox browsers on iOS instead of Safari.");
+            alert("For full features (social logins, external wallets), we recommend using Chrome browser on iOS. Popup features don't work in the PWA.");
+          } else {
+            alert("Android users: Popup features work great in both browser and PWA!");
           }
           alert("Enjoy playing! For the best experience, we recommend installing this app to your home screen.");
         }
