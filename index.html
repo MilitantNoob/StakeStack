@@ -43,6 +43,11 @@
           <p style="margin: 10px 0;">3. Tap <strong>Add</strong> to confirm</p>
         </div>
       </div>
+      <div id="browser-warning" class="glass-card" style="display: none; margin-top: 20px; background: rgba(255, 100, 100, 0.2); border: 1px solid rgba(255, 100, 100, 0.3);">
+        <p style="margin: 10px 0; color: #ff9999;"><strong>Browser Limitations Notice:</strong></p>
+        <p style="margin: 10px 0; font-size: 14px;">Safari on iOS has limitations that may affect popup functionality. For full features including social logins and external wallet connections, we recommend using Chrome or Firefox browsers.</p>
+        <p style="margin: 10px 0; font-size: 14px;">iOS users can also use the Chrome app from the App Store to access all features.</p>
+      </div>
       <p style="margin-top: 30px; font-size: 14px; color: #aaa;">Note: This game is optimized for installed app experience</p>
     </div>
     
@@ -111,9 +116,12 @@
         installPrompt.style.display = 'flex';
         // Show platform-specific instructions
         var platformInstructions = document.getElementById('platform-instructions');
+        var browserWarning = document.getElementById('browser-warning');
         if (isIOS) {
           document.getElementById('ios-instructions').style.display = 'block';
           document.getElementById('android-instructions').style.display = 'none';
+          // Show browser warning for iOS Safari
+          browserWarning.style.display = 'block';
           // Disable the install button for iOS since it uses a different mechanism
           document.getElementById('install-button').disabled = true;
           document.getElementById('install-button').style.opacity = '0.5';
@@ -136,7 +144,12 @@
         // Start the game when the page loads
         window.addEventListener('load', startGame);
       } else if (isDesktop) {
-        // On desktop, hide install prompt and allow game to load normally
+        // On desktop, show browser warning if using Safari
+        if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
+          var browserWarning = document.getElementById('browser-warning');
+          browserWarning.style.display = 'block';
+        }
+        // Hide install prompt and allow game to load normally
         installPrompt.style.display = 'none';
         // Start the game directly on desktop
         window.addEventListener('load', startGame);
@@ -146,7 +159,7 @@
       document.getElementById('install-button').addEventListener('click', async () => {
         if (isIOS) {
           // On iOS, show an alert with instructions to add to home screen
-          alert("To install this app on iOS:\\n1. Tap the Share button (square with arrow) at the bottom\\n2. Select 'Add to Home Screen'\\n3. Tap 'Add' to confirm");
+          alert("To install this app on iOS:\\n1. Tap the Share button (square with arrow) at the bottom\\n2. Select 'Add to Home Screen'\\n3. Tap 'Add' to confirm\\n\\nNote: For full features including social logins and external wallets, we recommend using Chrome app on iOS.");
         } else if (deferredPrompt) {
           // For Android and other platforms, use the normal install flow
           deferredPrompt.prompt();
@@ -171,6 +184,9 @@
       // Handle play anyway button
       document.getElementById('play-anyway').addEventListener('click', () => {
         if (isMobile) {
+          if (isIOS) {
+            alert("For the best experience with full features (social logins, external wallets), we recommend using Chrome or Firefox browsers on iOS instead of Safari.");
+          }
           alert("Enjoy playing! For the best experience, we recommend installing this app to your home screen.");
         }
         installPrompt.style.display = 'none';
