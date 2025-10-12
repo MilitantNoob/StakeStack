@@ -55,10 +55,6 @@
       <p>Loading Game...</p>
     </div>
 
-    <div id="pwa-warning" style="display: none; position: fixed; top: 10px; left: 10px; right: 10px; z-index: 999; background: rgba(255, 100, 100, 0.3); color: white; padding: 10px; border-radius: 8px; text-align: center; font-size: 14px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
-      <strong>Popup Limitations Notice:</strong> Social logins and external wallets work better in browser. Open StakeStack in Chrome or Firefox for full functionality.
-    </div>
-
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas" width=500 height=900 tabindex="-1"></canvas>
       <div id="unity-warning"></div>
@@ -245,19 +241,6 @@
       });
 
       function startGame() {
-        // Check if running as PWA and show warning about popup limitations
-        if (isStandalone()) {
-          // Show a warning to PWA users about popup limitations
-          setTimeout(function() {
-            if (confirm("Note: Some features like social logins and external wallets may not work properly in the installed app. For full functionality, please use the browser version of StakeStack.")) {
-              // User acknowledged, continue loading game
-            }
-          }, 3000); // Show after 3 seconds to not interfere with initial loading
-          
-          // Also show persistent banner for PWA users
-          document.getElementById('pwa-warning').style.display = 'block';
-        }
-
         if (isMobile) {
           container.className = "unity-mobile";
           canvas.className = "unity-mobile";
