@@ -182,9 +182,28 @@
         window.addEventListener('load', startGame);
       }
 
+      // Function to check for version updates and clear cache if needed
+      async function checkForVersionUpdate() {
+        try {
+          // Add cache-busting parameter to ensure we get the latest version.json
+          const timestamp = new Date().getTime();
+          const response = await fetch(`/version.json?cacheBust=${timestamp}`);
+          const versionData = await response.json();
+          console.log('Current version:', versionData.version);
+          
+          // Store the current version in sessionStorage for reference
+          sessionStorage.setItem('gameVersion', versionData.version);
+        } catch (error) {
+          console.error('Failed to check version:', error);
+        }
+      }
+
       // Register service worker for PWA
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
+          // Check for version update first
+          checkForVersionUpdate();
+          
           navigator.serviceWorker.register('/sw.js')
             .then(function(registration) {
               console.log('ServiceWorker registration successful with scope: ', registration.scope);
