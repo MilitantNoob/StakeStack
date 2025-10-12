@@ -73,6 +73,12 @@ self.addEventListener('install', async function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+  // Skip handling fetch requests for popup windows
+  if (event.request.destination === 'window' || event.request.destination === 'iframe') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
