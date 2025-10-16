@@ -16,6 +16,7 @@
     <link rel="shortcut icon" href="TemplateData/Logo.ico">
     <link rel="apple-touch-icon" href="TemplateData/Logo.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   </head>
   <body>
     <!-- Custom Background -->
@@ -58,7 +59,14 @@
     </div>
     
     <div id="loading-screen">
-      <p>Loading Game...</p>
+      <div id="download-container" style="display: none; text-align: center;">
+        <h2 id="download-text" style="font-family: 'Orbitron', 'Arial', sans-serif; font-size: 28px; margin-bottom: 20px; color: #4CAF50; text-shadow: 0 0 10px rgba(76, 175, 80, 0.7);">DOWNLOADING</h2>
+        <div id="progress-container" style="width: 80%; height: 20px; background-color: #333; border-radius: 10px; margin: 0 auto 20px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+          <div id="progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #4CAF50, #8BC34A); border-radius: 10px; transition: width 0.3s;"></div>
+        </div>
+        <p id="progress-text" style="font-family: 'Orbitron', 'Arial', sans-serif; font-size: 20px; color: #fff;">0%</p>
+      </div>
+      <p id="loading-text" style="font-family: 'Orbitron', 'Arial', sans-serif; font-size: 24px; color: #4CAF50;">LOADING GAME...</p>
     </div>
 
     <div id="unity-container" class="unity-desktop">
@@ -267,8 +275,20 @@
         var script = document.createElement("script");
         script.src = loaderUrl;
         script.onload = () => {
+          // Show the download container
+          document.getElementById('download-container').style.display = 'block';
+          document.getElementById('loading-text').style.display = 'none';
+          
           createUnityInstance(canvas, config, (progress) => {
-            // You can update a custom progress bar here if you want
+            // Update the progress bar
+            var progressBar = document.getElementById('progress-bar');
+            var progressText = document.getElementById('progress-text');
+            var percentage = Math.round(progress * 100);
+            
+            if (progressBar && progressText) {
+              progressBar.style.width = percentage + '%';
+              progressText.textContent = percentage + '%';
+            }
           }).then((unityInstance) => {
             loadingScreen.style.display = "none";
           }).catch((message) => {

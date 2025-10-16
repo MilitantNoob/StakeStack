@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
 html, body {
   height: 100%;
   width: 100%;
@@ -7,6 +9,9 @@ html, body {
   overflow: hidden; /* Hide scrollbars */
   perspective: 1000px; /* Add perspective to the body for the 3D effect */
 }
+
+/* Import Orbitron font for gaming look */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
 /* Enhanced Pure CSS Starfield Background */
 @keyframes move-stars {
@@ -190,7 +195,8 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: Arial, sans-serif;
+  flex-direction: column;
+  font-family: 'Orbitron', 'Arial', sans-serif;
   font-size: 2em;
   z-index: 10;
 }
